@@ -13,5 +13,9 @@ def  test():
     yield from u.save()
 
 loop = asyncio.get_event_loop()
-loop.run_util_complete(test())
+loop.run_until_complete(test())
 loop.close()
+
+
+if __name__=='__main__':
+    test()
