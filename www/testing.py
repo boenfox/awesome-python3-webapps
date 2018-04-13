@@ -8,10 +8,11 @@ import sys
 
 
 @asyncio.coroutine
-def  test():
+def  test(loop):
     yield from orm.create_pool(loop=loop, host='localhost', port=3306, user='root', password='68582188', db='awesome')
     u = User(name='Test', email='test@example.com', passwd='123456', image='about:blank',id='123')
     yield from u.save()
+    yield from orm.destory_pool()
 
 if __name__ == '__main__':   
     loop = asyncio.get_event_loop()
