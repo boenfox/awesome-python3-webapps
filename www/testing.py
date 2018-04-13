@@ -4,6 +4,7 @@
 import orm
 from models import User,Blog, Comment
 import asyncio
+import sys
 
 
 @asyncio.coroutine
@@ -12,10 +13,11 @@ def  test():
     u = User(name='Test', email='test@example.com', passwd='123456', image='about:blank',id='123')
     yield from u.save()
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(test())
-loop.close()
+if __name__ == '__main__':   
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(test(loop))
+    loop.close()
+    if loop.is_closed():
+        sys.exit(0)
 
 
-if __name__=='__main__':
-    test()
