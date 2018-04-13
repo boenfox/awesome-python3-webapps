@@ -54,7 +54,7 @@ def execute(sql, args, autocommit=True):
             yield from cur.close()
             if not autocommit:
                 yield from conn.commit()
-        except BaseException as e:
+        except BaseException:
             if not autocommit:
                 yield from conn.rollback()
             raise
@@ -69,7 +69,7 @@ def create_args_string(num):
 
 class Field(object):
 
-    def __init_(self, name, column_type, primary_key, default):
+    def __init__(self, name, column_type, primary_key, default):
         self.name = name
         self.column_type = column_type
         self.primary_key = primary_key
