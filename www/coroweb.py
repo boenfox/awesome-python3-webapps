@@ -81,27 +81,28 @@ class RequestHandler(object):
         self._func = fn
         self. _has_request_arg = has_request_arg(fn)
         self._has_var_kw_arg = has_var_kw_args(fn)
-        self._has_named_kw_arg = has_named_kw_args(fn)
+        self._has_named_kw_args = has_named_kw_args(fn)
+        self._named_kw_args = get_named_kw_args(fn)
         self._required_kw_args = get_required_kw_args(fn)
 
     @asyncio.coroutine
     def __call__(self, request):
         kw = None
-        if self._has_var_kw_arg or self._has_named_kw_arg or self._required_kw_args:
+        if self._has_var_kw_arg or self._has_named_kw_args or self._required_kw_args:
             if request.method == 'POST':              
                 if not request.content_type:
-                    return web.HTTPBadRequest('Missing Content-type.')
+                    return web.HTTPBadRequest()
                 ct = request.content_type.lower()
                 if ct.startwith('application/json'):
                     params = yield from request.json()
                     if not isinstance(params, dict):
-                        return web.HTTPBadRequest('JSON body must be object.')
+                        return web.HTTPBadRequest()
                     kw =params
                 elif ct.startwith('application/x-www-form-urlencoded') or ct.startwith('multipart/form-data'):
                     params = yield from request.post()
                     kw = dict(**params)
                 else:
-                    return web.HTTPBadRequest('Unsupport content-type:%s' % request.content_type)
+                    return web.HTTPBadRequest()
             if request.method == 'GET':
                 qs = request.query_string
                 if qs:
@@ -111,10 +112,10 @@ class RequestHandler(object):
         if kw is None:
             kw = dict(**request.match_info)
         else:
-            if not self._has_var_kw_arg and self._named_kw_arg:
+            if not self._has_var_kw_arg and self._named_kw_args:
                 # remove all unamed kw:
                 copy = dict()
-                if name in self._named_kw_args:
+                for name in self._named_kw_args:
                     if name in kw:
                         copy[name]=kw[name]
                     kw = copy
@@ -129,7 +130,7 @@ class RequestHandler(object):
         if self._required_kw_args:
             for name in self._required_kw_args:
                 if not name in kw:
-                    return web.HTTPBadRequest('Missing argument: %s' % name)
+                    return web.HTTPBadRequest()
         logging.info('call with args: %s' % str(kw))
         try:
             r = yield from self._func(**kw)
