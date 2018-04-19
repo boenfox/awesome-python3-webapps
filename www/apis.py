@@ -19,7 +19,8 @@ class Page(object):
         '''
         self.item_count = item_count
         self.page_size = page_size
-        self.page_count  = item_count 
+        self.page_count  = item_count
+         
 
 class APIError(Exception):
     '''
